@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+				 "-//mybatis.org//DTD Mapper 3.0//EN"
+		  		 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 실질적으로 데이터베이스 접근에 사용될 쿼리를 작성하는 곳. dtd 양식에 맞게 작성 해야된다. -->
+<mapper namespace="com.hair.loss.dao.HairBoardDAO">
+
+	<!-- <resultMap id="hairBoardVO" type="hairBoardVO">
+		<result property="bnum" column="bnum"/>
+		<result property="title" column="title"/>
+		<result property="contents" column="contents"/>
+		<result property="regdate" column="regdate"/>
+		<result property="users_id" column="users_id"/>
+	</resultMap> -->
+
+	<!-- select문 안에 작성하면 됌. -->
+	<select id="hairBoardList" resultType="hairBoardVO">
+	<![CDATA[
+		SELECT ROWNUM AS rnum
+			 , bnum
+			 , title
+			 , contents
+			 , regdate
+			 , users_id
+			 , del_yn
+		  FROM HAIR_BOARD
+		 WHERE del_yn = 'N'
+		 ORDER BY rnum DESC
+	]]>
+	</select>
+
+	<!-- 게시글 작성 -->
+	<!-- <insert id="hairBoardInsert" parameterType="hairBoardVO" useGeneratedKeys="true" keyProperty="bnum"> -->
+	<insert id="hairBoardInsert" parameterType="hairBoardVO">
+<!-- 		<selectKey keyProperty="bnum" resultType="java.math.BigInteger" order="BEFORE"> 
+				SELECT bnum.NEXTVAL FROM DUAL
+		</selectKey> -->
+		INSERT INTO HAIR_BOARD
+		(
+		   bnum
+		 , title
+		 , users_id
+		 , contents
+		 , regdate
+		 , del_yn
+		)
+		 VALUES
+		(
+		   (SELECT NVL(MAX(bnum+1), 1) AS bnum FROM HAIR_BOARD)
+		 , #{title}
+		 , #{users_id}
+		 , #{contents}
+		 , SYSDATE
+		 , 'N'
+		)
+	
+	</insert>
+
+	<!-- 게시글 상세보기 -->
+	<select id="hairBoardDetail" resultType="hairBoardVO">
+		 SELECT bnum
+		 	  , users_id
+			  , title
+			  , contents
+			  , regdate
+		   FROM HAIR_BOARD
+		  WHERE	bnum = #{bnum}
+	</select>
+	
+	<!-- 게시글 수정 -->
+	<update id="hairBoardUpdate" parameterType="hairBoardVO">
+		UPDATE HAIR_BOARD
+		   SET title = #{title}
+			 , contents = #{contents}
+			 , regdate = SYSDATE
+		WHERE bnum = #{bnum}
+	</update>
+	
+	<!-- 게시글 삭제 -->
+	<update id="hairBoardDelete" parameterType="hairBoardVO">
+		UPDATE HAIR_BOARD
+		   SET del_yn = 'Y'
+		 WHERE bnum = #{bnum}
+	</update>
+	
+	<!-- 게시글 갯수 -->
+	<select id="hairBoardCount" resultType="int">
+		SELECT COUNT(*)
+		  FROM HAIR_BOARD
+	</select>
+	
+	<!-- 파일 업로드 -->
+	<insert id="hairInsertFile" parameterType="hashmap">
+	<![CDATA[
+		INSERT INTO
+		(
+		   BNUM
+		 , ORIGINAL_FILE_NAME
+		 , STORED_FILE_NAME
+		 , FILE_SIZE
+		 , USERS_ID
+		 , FNUM
+		)
+		 VALUES
+		(
+		   #{BNUM}
+		 , #{ORIGINAL_FILE_NAME}
+		 , #{STORED_FILE_NAME}
+		 , #{FILE_SIZE}
+		 , #{USERS_ID}
+		 , FNUM.NEXTVAL
+		)	
+	]]>
+	</insert>
+</mapper>

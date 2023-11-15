@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+
+<!-- log4j2 설정(성능 문제로 개발 서버에서만 사용. 운영 서버에서는 사용 X) -->
+  <Appenders>
+    <Console name="STDOUT" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n"/>
+    </Console>
+  </Appenders>
+  
+  <Loggers>
+    <Logger name="org.apache.log4j.xml" level="DEBUG"/>
+    <Root level="debug">
+      <AppenderRef ref="STDOUT"/>
+    </Root>
+  </Loggers>
+  
+</Configuration>

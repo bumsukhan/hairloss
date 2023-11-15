@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc
+						http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+						http://www.springframework.org/schema/beans
+						http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+						http://www.springframework.org/schema/context
+						http://www.springframework.org/schema/context/spring-context-4.0.xsd
+						http://www.springframework.org/schema/aop
+						http://www.springframework.org/schema/aop/spring-aop-4.3.xsd">
+
+	<!-- 스프링 각종 어노테이션 지원 -->
+	<mvc:annotation-driven />
+	
+	<!-- 패키지 내에서 어노테이션 존재 유무를 인식하고, 존재 하면, 어떤 어노테이션인지 식별한다. 신경쓰지 마셈.-->
+	<context:component-scan base-package="com.hair.loss" />
+	
+	<!-- 웹어플리케이션 폴더(webapp)의 resourses 폴더에 접근 하기 쉽도록 매핑. 신경쓰지 마셈. -->
+	<mvc:resources mapping="/resources/**" location="/resources/" />
+	
+	<!-- aop (나중에 해보자.) -->
+	<!-- <aop:aspectj-autoproxy/> -->
+
+	<!-- ViewResolver (뷰페이지의 default 경로(prefix)와 확장자명(suffix)를 지정한다고 생각하셈. 신경쓰지 마셈.) -->
+	<!-- 여기서 p:order는 순번을 뜻하며, 3번째로 실행 하라는 뜻 -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:order="3">
+		  <property name="prefix" value="/WEB-INF/views/" />
+		  <property name="suffix" value=".jsp" />
+	</bean>
+	
+	<!-- JSON Support (이것도 신경쓰지 마셈.) -->
+	<bean name="viewResolver" class="org.springframework.web.servlet.view.BeanNameViewResolver" p:order="0"></bean>
+	<bean name="jsonTemplate" class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">
+    	<property name="contentType" value="application/json;charset=UTF-8" />
+    </bean>
+	
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="100000000" />
+		<property name="maxInMemorySize" value="100000000" />
+	</bean>
+	
+</beans>

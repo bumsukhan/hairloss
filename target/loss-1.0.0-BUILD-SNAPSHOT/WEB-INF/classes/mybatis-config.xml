@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+		  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+		  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+	<!-- CamelCase 사용 설정 -->
+	<!-- <settings>
+			<setting name="mapUnderscoreToCamelCase" value="true" />
+		 </settings> -->
+	
+	<!-- mybatis에서 resultType에 model 사용 시, 경로 맵핑이 아닌 변수 맵핑을 지원 받기 위해 별칭 생성  -->
+	<typeAliases>
+		<typeAlias alias="hairBoardVO" type="com.hair.loss.model.HairBoardVO" />
+		<typeAlias alias="hairUserVO" type="com.hair.loss.model.HairUserVO" />
+		<typeAlias alias="hairReplyVO" type="com.hair.loss.model.HairReplyVO" />
+	</typeAliases>
+	
+</configuration>

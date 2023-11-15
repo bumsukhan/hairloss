@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+				 "-//mybatis.org//DTD Mapper 3.0//EN"
+		  		 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hair.loss.dao.HairReplyDAO">
+
+	<select id="hairReplyList" resultType="hairReplyVO">
+		SELECT renum
+			 , bnum
+			 , rcontents
+			 , users_id
+			 , regdate
+			 , udate
+		  FROM HAIR_REPLY
+		 WHERE bnum = #{bnum}
+		 ORDER BY renum DESC
+	</select>
+
+	<insert id="hairReplyInsert">
+		
+		INSERT INTO
+			HAIR_REPLY
+		(
+		   renum
+		 , bnum
+		 , users_id
+		 , rcontents
+		 , regdate
+		 , udate
+		)
+		VALUES
+		(
+		   renum.NEXTVAL
+		 , #{bnum}
+		 , #{users_id}
+		 , #{rcontents}
+		 , sysdate
+		 , sysdate
+		)	
+	</insert>
+	
+	<update id="hairReplyUpdate">
+		UPDATE HAIR_REPLY
+		   SET rcontents = #{rcontents}
+			 , udate = sysdate
+		WHERE rnum = #{rnum}
+	</update>
+	
+	<delete id="hairReplyDelete">
+		DELETE
+		  FROM HAIR_PEPLY
+		 WHERE bnum = #{bnum}
+	</delete>
+	
+	<select id="hairReplyCount" resultType="int">
+		SELECT COUNT(bnum)
+		  FROM HAIR_REPLY
+		 WHERE bnum = #{bnum}
+	</select>
+	
+</mapper>

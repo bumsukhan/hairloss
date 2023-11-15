@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:tx="http://www.springframework.org/schema/tx"
+	   xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	   xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	   xsi:schemaLocation="http://www.springframework.org/schema/jdbc
+						   http://www.springframework.org/schema/jdbc/spring-jdbc-4.2.xsd
+						   http://mybatis.org/schema/mybatis-spring
+						   http://mybatis.org/schema/mybatis-spring-1.2.xsd
+						   http://www.springframework.org/schema/beans
+						   https://www.springframework.org/schema/beans/spring-beans.xsd
+						   http://www.springframework.org/schema/tx
+						   http://www.springframework.org/schema/tx/spring-tx-4.2.xsd">
+
+	<!-- dataSource(SqlDeveloper에 접근 하기 위한 설정. 넌 오라클 url id가 xe인지 확인하고, 아이디랑 비밀번호만 작성 해라.) -->
+	<bean id="dataSourceSpied" 
+		  class="org.apache.commons.dbcp.BasicDataSource"
+		  destroy-method="close">
+		  <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+		  <property name="url" value="jdbc:oracle:thin:@localhost:1521:xe" />
+		  <property name="username" value="hairloss" />
+		  <property name="password" value="tiger" />
+	</bean>
+
+	<!-- Log4j Data Formatter (프로젝트 런타임 동안 내가 요청한 Sql이 콘솔에 찍힌다. 신경 쓰지 마셈.) -->
+	<bean id="dataSource-oracle" class="net.sf.log4jdbc.Log4jdbcProxyDataSource">
+		  <constructor-arg ref="dataSourceSpied" />
+		  <property name="logFormatter"> 
+			  <bean class="net.sf.log4jdbc.tools.Log4JdbcCustomFormatter">
+				  <property name="loggingType" value="MULTI_LINE" />
+				  <property name="sqlPrefix" value="SQL : "/>
+			  </bean>
+		  </property>
+	</bean>
+
+	<!-- sqlSessionFactory (mybatis를 사용하기 위한 설정 파일과, DB에 접근하기 위한 xml 설정 파일. 신경쓰지 마셈.) -->
+	<bean id="sqlSessionFactory"
+		  class="org.mybatis.spring.SqlSessionFactoryBean">
+		  <property name="dataSource" ref="dataSourceSpied" /> 
+		  <property name="configLocation" value="classpath:/mybatis-config.xml" />
+		  <property name="mapperLocations" value="classpath:/sqlmap/*.xml" />
+	</bean>
+
+	<!-- SqlSession (SqlFactory의 자식 객체로 template 방식으로 접근 하기 위해 설정 하는 것. 신경쓰지 마셈.) -->
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate" destroy-method="clearCache"> 
+		<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory" /> 
+	</bean>
+
+	<!-- mapperScanner (componant-scan처럼 mapper를 자동으로 스캔 해 준다. 신경 쓰지 마셈.) -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		  <property name="basePackage" value="com.hair.loss.dao" />
+	</bean>
+
+	<!-- transactionManager (데이터베이스 연결 객체를 참조 한 트랜잭션 매니져 클래스 지정. 신경쓰지 마셈. ) -->
+	<bean id="transactionManager"
+		  class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		  <property name="dataSource" ref="dataSourceSpied" />
+	</bean>
+
+	<!-- transactionAnnotation (데이터 IO 실패 시 자동 rollback 하는 어노테이션. 성공 시 commit) -->
+	<!-- 위에 말은 어려우니까 내부적으로 백업 시켜놔서, 좆되면 데이터 조작을 되돌려 주는거라고 생각하면 됌.
+	service랑 dao 중에 이전으로 되돌리고 싶은 복원지점을 선택해서 써주면 됌. @Transaction -->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+
+</beans>

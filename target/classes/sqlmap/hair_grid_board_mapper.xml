@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+				 "-//mybatis.org//DTD Mapper 3.0//EN"
+		  		 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 실질적으로 데이터베이스 접근에 사용될 쿼리를 작성하는 곳. dtd 양식에 맞게 작성 해야된다. -->
+<mapper namespace="com.hair.loss.dao.HairGridBoardDAO">
+    <sql id="includeBoard">
+		    <if test="searchType=='title' and keyword != null and keyword != '' ">
+				AND title like '%'||#{keyword}||'%'
+			</if>
+			<if test="searchType=='content' and keyword != null and keyword != '' ">
+				AND contents like '%'||#{keyword}||'%'
+			</if>
+			<if test="searchType=='reg_id' and keyword != null and keyword != '' ">
+				AND users_id like '%'||#{keyword}||'%'
+			</if>
+    </sql>
+    
+	<!-- select문 안에 작성하면 됌. -->
+	<select id="hairGridBoardList" resultType="hairGridBoardVO">
+		SELECT A.*
+		  FROM (
+				SELECT ROW_NUMBER() OVER(ORDER BY regdate desc) AS rnum
+					 , RANK() OVER (ORDER BY BNUM) rnk
+			 		 , bnum
+			 		 , title
+			 		 , contents
+			 		 , regdate
+			 		 , users_id
+			 		 , del_yn
+		  		  FROM HAIR_BOARD A
+		 		 WHERE del_yn = 'N'
+		 		 <include refid = "includeBoard" />
+		        ) A
+		 WHERE 1=1
+		   AND A.rnum <![CDATA[>]]> ((#{page}-1) * #{perPageNum})
+		   AND A.rnum <![CDATA[<=]]> (#{page} * #{perPageNum})
+	</select>
+	
+	<!-- 게시글 상세보기 -->
+	<select id="hairGridBoardDetail" resultType="hairGridBoardVO">
+		 SELECT bnum
+		 	  , users_id
+			  , title
+			  , contents
+			  , regdate
+		   FROM HAIR_BOARD
+		  WHERE	bnum = #{bnum}
+	</select>
+	
+	<!-- 게시글 작성 -->
+	<!-- <insert id="hairGridBoardInsert" parameterType="hairGridBoardVO" useGeneratedKeys="true" keyProperty="bnum"> -->
+	<insert id="hairGridBoardInsert" parameterType="hairGridBoardVO">
+<!-- 		<selectKey keyProperty="bnum" resultType="java.math.BigInteger" order="BEFORE"> 
+				SELECT bnum.NEXTVAL FROM DUAL
+		</selectKey> -->
+		INSERT INTO HAIR_BOARD
+		(
+		   bnum
+		 , title
+		 , users_id
+		 , contents
+		 , regdate
+		 , del_yn
+		)
+		 VALUES
+		(
+		   (SELECT NVL(MAX(bnum+1), 1) AS bnum FROM HAIR_BOARD)
+		 , #{title}
+		 , #{users_id}
+		 , #{contents}
+		 , SYSDATE
+		 , 'N'
+		)
+	</insert>
+	
+	<!-- 게시글 수정 -->
+	<update id="hairGridBoardUpdate" parameterType="hairGridBoardVO">
+		UPDATE HAIR_BOARD
+		   SET title = #{title}
+			 , contents = #{contents}
+			 , regdate = SYSDATE
+		WHERE bnum = #{bnum}
+	</update>
+	
+	<!-- 게시글 삭제 -->
+	<update id="hairGridBoardDelete" parameterType="hairGridBoardVO">
+		UPDATE HAIR_BOARD
+		   SET del_yn = 'Y'
+		 WHERE bnum = #{bnum}
+	</update>
+	
+	<!-- 게시글 갯수 -->
+	<select id="hairGridBoardCount" resultType="int">
+		SELECT COUNT(*)
+		  FROM HAIR_BOARD
+		 WHERE 1=1
+		<include refid = "includeBoard" />
+	</select>
+	
+	<!-- 다음글 -->
+	<select id="hairNext" resultType="hairGridBoardVO">
+		SELECT bnum
+			 , title
+		 	 , users_id
+		 	 , contents
+		 	 , regdate
+		 	 , del_yn
+		 	 , (SELECT bnum FROM HAIR_BOARD WHERE DEL_YN = 'N' AND BNUM IN(#{bnum})) AS chknum
+          FROM HAIR_BOARD
+         WHERE bnum
+            IN (
+                SELECT MIN(bnum)
+                FROM HAIR_BOARD
+                WHERE bnum <![CDATA[>]]> #{bnum}
+                  AND del_yn = 'N'
+               )
+	</select>
+	
+	<!-- 이전글 -->
+	<select id="hairPre" resultType="hairGridBoardVO">
+		SELECT bnum
+			 , title
+		 	 , users_id
+		 	 , contents
+		 	 , regdate
+		 	 , del_yn
+		 	 , (SELECT bnum FROM HAIR_BOARD WHERE DEL_YN = 'N' AND BNUM IN(#{bnum})) AS chknum
+          FROM HAIR_BOARD
+         WHERE bnum
+            IN (
+                SELECT MAX(bnum)
+                FROM HAIR_BOARD
+                WHERE bnum <![CDATA[<]]> #{bnum}
+                  AND del_yn = 'N'
+               )
+	</select>
+	
+</mapper>
