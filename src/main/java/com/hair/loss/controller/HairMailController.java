@@ -22,7 +22,9 @@ public class HairMailController {
 		ModelAndView view = new ModelAndView();
 		view.setViewName("mailTest");
 		view.addObject("name", "yeeun");
-		
+
+		System.out.println("test");
+
 		return view;
 	}
 
