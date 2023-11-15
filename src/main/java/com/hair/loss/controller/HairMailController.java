@@ -23,7 +23,7 @@ public class HairMailController {
 		view.setViewName("mailTest");
 		view.addObject("name", "yeeun");
 
-		System.out.println("test");
+		System.out.println("test1");
 
 		return view;
 	}
